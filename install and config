@@ -1,4 +1,5 @@
 Install Podman
+Install :: https://podman-desktop.io/docs/installation/windows-install
 Download :: WSL ->https://learn.microsoft.com/en-us/windows/wsl/about#what-is-wsl-2
 Enable :: Virtualization-> https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/nested-virtualization#configure-nested-virtualization
 การเปิดใช้งาน Virtual Machine Platform ใน BIOS (Basic Input/Output System) ไม่ได้เป็นส่วนหนึ่งของขั้นตอนในการติดตั้ง Podman หรือการใช้งาน WSL 2 บน Windows 10 หรือ Windows 11 โดยตรง โดยทั่วไปแล้วการเปิดใช้งาน Virtual Machine Platform จะทำผ่านการตั้งค่าใน Windows โดยไม่จำเป็นต้องเข้า BIOS ดังนั้นคำแนะนำเหล่านี้เป็นเพียงขั้นตอนที่ไม่จำเป็น:
@@ -56,3 +57,8 @@ bashCopy code :: podman run -d --name grafana-server --network grafana-net -p 30
 3.เปิด Port ให้เข้าถึง Grafana: คุณสามารถเข้าถึง Grafana ได้ที่ http://localhost:3000 หรือที่ IP Address ของเครื่องที่ทำการติดตั้ง โดยใช้ username และ password เริ่มต้นคือ admin / admin
 4.เปลี่ยน Password ของผู้ใช้ Admin: เมื่อคุณเข้าสู่ Grafana ครั้งแรก โปรแกรมจะขอให้คุณเปลี่ยนรหัสผ่านของผู้ใช้ Admin เพื่อเพิ่มความปลอดภัย
 ด้วยขั้นตอนเหล่านี้คุณสามารถสร้าง Grafana Server บน Podman โดยใช้พอร์ตที่ไม่ซ้ำกันได้อย่างง่ายดาย และมีการใช้งานแยกต่างหากระหว่าง Grafana Server และ Zabbix Web Frontend
+
+---------------------------------------step grafana add plugin zabbix -------------------------------------------------------
+https://www.alibabacloud.com/help/en/grafana/user-guide/add-and-use-a-zabbix-data-source
+---------------------------------------step grafana add plugin logi --------------------------------------------------------
+https://grafana.com/docs/grafana/latest/datasources/loki/configure-loki-data-source/
