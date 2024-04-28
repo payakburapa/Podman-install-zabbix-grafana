@@ -1,0 +1,58 @@
+Install Podman
+Download :: WSL ->https://learn.microsoft.com/en-us/windows/wsl/about#what-is-wsl-2
+Enable :: Virtualization-> https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/nested-virtualization#configure-nested-virtualization
+การเปิดใช้งาน Virtual Machine Platform ใน BIOS (Basic Input/Output System) ไม่ได้เป็นส่วนหนึ่งของขั้นตอนในการติดตั้ง Podman หรือการใช้งาน WSL 2 บน Windows 10 หรือ Windows 11 โดยตรง โดยทั่วไปแล้วการเปิดใช้งาน Virtual Machine Platform จะทำผ่านการตั้งค่าใน Windows โดยไม่จำเป็นต้องเข้า BIOS ดังนั้นคำแนะนำเหล่านี้เป็นเพียงขั้นตอนที่ไม่จำเป็น:
+1.เปิดใช้งาน Virtual Machine Platform ใน Windows:
+เปิด "Control Panel" บน Windows 10 หรือ "Settings" บน Windows 11
+เข้าไปที่ "Programs" > "Programs and Features" บน Windows 10 หรือ "Apps" > "Optional features" บน Windows 11
+ค้นหา "Virtual Machine Platform" และติ๊กเลือกเพื่อเปิดใช้งาน
+2.เปิดใช้งาน Windows Subsystem for Linux (WSL):
+-เปิด PowerShell หรือ Command Prompt ในโหมด Administrator
+-ใช้คำสั่งต่อไปนี้เพื่อเปิดใช้งาน WSL:
+bashCopy code :: dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart 
+3.เปิดใช้งาน Hyper-V (ถ้าต้องการใช้งาน):
+-ใช้คำสั่งต่อไปนี้เพื่อเปิดใช้งาน Hyper-V บน Windows 10 หรือ Windows 11:
+bashCopy code :: dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart 
+4.รีสตาร์ทคอมพิวเตอร์ของคุณ:
+หลังจากที่เปิดใช้งาน Virtual Machine Platform, WSL, และ Hyper-V แล้ว คุณจะต้องรีสตาร์ทคอมพิวเตอร์ของคุณเพื่อให้การเปลี่ยนแปลงมีผล
+หลังจากการรีสตาร์ทคอมพิวเตอร์แล้วคุณสามารถใช้ WSL 2 และติดตั้ง Podman หรือ Linux distribution อื่น ๆ ได้บน Windows 10 หรือ Windows 11 ได้แล้ว โดยไม่จำเป็นต้องเข้า BIOS หรือเปิดใช้งาน Virtual Machine Platform ผ่านการตั้งค่าใน BIOS
+
++++++++++++++++++++++++Confige zabix and grafana+++++++++++++++++++++++++++
+การสร้าง Zabbix Server โดยใช้ Podman เป็นเครื่องมือที่มีประสิทธิภาพสำหรับการสร้างและจัดการคอนเทนเนอร์บนระบบปฏิบัติการ Linux นี่คือขั้นตอนเบื้องต้นในการสร้าง Zabbix Server โดยใช้ Podman:
+1.สร้าง Docker Network: เราจะสร้างเครือข่าย Docker เพื่อให้คอนเทนเนอร์สามารถสื่อสารกันได้:
+bashCopy code :: podman network create zabbix-net 
+2.สร้าง Container สำหรับ PostgreSQL: สร้าง Container ที่ใช้ PostgreSQL เป็นฐานข้อมูลสำหรับ Zabbix:
+bashCopy code :: podman run -d --name zabbix-postgres --network zabbix-net -e POSTGRES_DB=zabbix -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password postgres:latest 
+3.สร้าง Container สำหรับ Zabbix Server: สร้าง Container ที่ใช้ Zabbix Server:
+bashCopy code :: podman run -d --name zabbix-server --network zabbix-net -p 80:80 -p 10051:10051 -e DB_SERVER_HOST=zabbix-postgres -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password zabbix/zabbix-server-pgsql:latest 
+4.สร้าง Container สำหรับ Zabbix Web Frontend: สร้าง Container ที่ใช้ Zabbix Web Frontend:
+bashCopy code :: podman run -d --name zabbix-web --network zabbix-net -p 8080:8080 -e DB_SERVER_HOST=zabbix-postgres -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password -e ZBX_SERVER_HOST=zabbix-server -e PHP_TZ=Asia/Bangkok zabbix/zabbix-web-apache-pgsql:latest 
+5.เปิด Port ให้เข้าถึง Zabbix Web Frontend: คุณสามารถเข้าถึง Zabbix Web Frontend ได้ที่ http://localhost:8080 หรือที่ IP Address ของเครื่องที่ทำการติดตั้ง โดยใช้ Username และ Password เริ่มต้นคือ Admin / zabbix
+เปิด Port ให้เข้าถึง Zabbix Server: ให้เชื่อมต่อกับ Zabbix Server ผ่าน Port 10051 เพื่อการติดต่อกับ Zabbix Agent และเข้าถึงข้อมูลของ Zabbix Server ตามต้องการ
+ขั้นตอนเหล่านี้จะช่วยให้คุณสามารถสร้าง Zabbix Server โดยใช้ Podman ได้อย่างง่ายดาย โดยไม่จำเป็นต้องใช้ Docker หรือการติดตั้งโปรแกรมใด ๆ บนระบบปฏิบัติการของคุณ
+
+------------------------------------ถ้า port ชนกัน----------------------------------------------
+เมื่อมีความจำเป็นที่จะใช้พอร์ตที่ไม่ซ้ำกันสำหรับการสร้าง Zabbix Server บน Podman คุณสามารถทำได้โดยระบุพอร์ตที่ไม่ซ้ำกันสำหรับแต่ละคอนเทนเนอร์ นี่คือขั้นตอนที่ต้องทำ:
+1.สร้าง Docker Network: เริ่มต้นโดยการสร้างเครือข่าย Docker โดยใช้ Podman:
+bashCopy code :: podman network create zabbix-net 
+2.สร้าง Container สำหรับ PostgreSQL: สร้าง Container สำหรับ PostgreSQL เชื่อมต่อกับเครือข่าย Docker:
+bashCopy code :: podman run -d --name zabbix-postgres --network zabbix-net -e POSTGRES_DB=zabbix -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password postgres:latest 
+3.สร้าง Container สำหรับ Zabbix Server: สร้าง Container สำหรับ Zabbix Server โดยระบุพอร์ตที่ไม่ซ้ำกัน เช่น 8080:
+bashCopy code :: podman run -d --name zabbix-server --network zabbix-net -p 8080:80 -p 10051:10051 -e DB_SERVER_HOST=zabbix-postgres -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password zabbix/zabbix-server-pgsql:latest 
+4.สร้าง Container สำหรับ Zabbix Web Frontend: สร้าง Container สำหรับ Zabbix Web Frontend โดยระบุพอร์ตที่ไม่ซ้ำกัน เช่น 8888:
+bashCopy code :: podman run -d --name zabbix-web --network zabbix-net -p 8888:8080 -e DB_SERVER_HOST=zabbix-postgres -e POSTGRES_USER=zabbix -e POSTGRES_PASSWORD=password -e ZBX_SERVER_HOST=zabbix-server -e PHP_TZ=Asia/Bangkok zabbix/zabbix-web-apache-pgsql:latest 
+5.เปิด Port ให้เข้าถึง Zabbix Web Frontend: คุณสามารถเข้าถึง Zabbix Web Frontend ได้ที่ http://localhost:8888 หรือที่ IP Address ของเครื่องที่ทำการติดตั้ง โดยใช้ Username และ Password เริ่มต้นคือ Admin / zabbix
+6.เปิด Port ให้เข้าถึง Zabbix Server: ให้เชื่อมต่อกับ Zabbix Server ผ่าน Port 10051 เพื่อการติดต่อกับ Zabbix Agent และเข้าถึงข้อมูลของ Zabbix Server ตามต้องการ
+ด้วยขั้นตอนเหล่านี้คุณสามารถสร้าง Zabbix Server บน Podman โดยใช้พอร์ตที่ไม่ซ้ำกันได้อย่างง่ายดาย และมีการใช้งานแยกต่างหากระหว่าง Zabbix Server และ Zabbix Web Frontend
+
+
+------------------------------------step bluid gafana บน podman โดยใช้ port ไม่ซ้ำกับอันอื่น----------------------------------------------
+
+เมื่อต้องการสร้าง Grafana Server โดยใช้ Podman โดยกำหนดพอร์ตที่ไม่ซ้ำกัน คุณสามารถทำได้โดยปฏิบัติดังนี้:
+1.สร้าง Docker Network: เริ่มต้นโดยการสร้างเครือข่าย Docker โดยใช้ Podman:
+bashCopy code :: podman network create grafana-net 
+2.สร้าง Container สำหรับ Grafana: สร้าง Container สำหรับ Grafana โดยระบุพอร์ตที่ไม่ซ้ำกัน เช่น 3000:
+bashCopy code :: podman run -d --name grafana-server --network grafana-net -p 3000:3000 grafana/grafana:latest 
+3.เปิด Port ให้เข้าถึง Grafana: คุณสามารถเข้าถึง Grafana ได้ที่ http://localhost:3000 หรือที่ IP Address ของเครื่องที่ทำการติดตั้ง โดยใช้ username และ password เริ่มต้นคือ admin / admin
+4.เปลี่ยน Password ของผู้ใช้ Admin: เมื่อคุณเข้าสู่ Grafana ครั้งแรก โปรแกรมจะขอให้คุณเปลี่ยนรหัสผ่านของผู้ใช้ Admin เพื่อเพิ่มความปลอดภัย
+ด้วยขั้นตอนเหล่านี้คุณสามารถสร้าง Grafana Server บน Podman โดยใช้พอร์ตที่ไม่ซ้ำกันได้อย่างง่ายดาย และมีการใช้งานแยกต่างหากระหว่าง Grafana Server และ Zabbix Web Frontend
