@@ -17,6 +17,13 @@ bashCopy code :: dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V
 4.รีสตาร์ทคอมพิวเตอร์ของคุณ:
 หลังจากที่เปิดใช้งาน Virtual Machine Platform, WSL, และ Hyper-V แล้ว คุณจะต้องรีสตาร์ทคอมพิวเตอร์ของคุณเพื่อให้การเปลี่ยนแปลงมีผล
 หลังจากการรีสตาร์ทคอมพิวเตอร์แล้วคุณสามารถใช้ WSL 2 และติดตั้ง Podman หรือ Linux distribution อื่น ๆ ได้บน Windows 10 หรือ Windows 11 ได้แล้ว โดยไม่จำเป็นต้องเข้า BIOS หรือเปิดใช้งาน Virtual Machine Platform ผ่านการตั้งค่าใน BIOS
++++++++++++++++++++++++ขั้นตอนการ start podman container++++++++++++++++++++
+https://devopscube.com/podman-tutorial-beginners/
+ขึ้นตอนสั้นๆ หลังติดตั้ง podman เรียบร้อยแล้ว
+1.เปิด powershell ขึ้นมาแล้ว 
+2.check เครื่องใน podman ว่ามีไหมโดยใช้คำสั่ง 'podman system connection list'
+3.และใส่คำสั่งสร้งเครื่อง 'podman machine init'
+4.
 
 +++++++++++++++++++++++Confige zabix and grafana+++++++++++++++++++++++++++
 การสร้าง Zabbix Server โดยใช้ Podman เป็นเครื่องมือที่มีประสิทธิภาพสำหรับการสร้างและจัดการคอนเทนเนอร์บนระบบปฏิบัติการ Linux นี่คือขั้นตอนเบื้องต้นในการสร้าง Zabbix Server โดยใช้ Podman:
